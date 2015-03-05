@@ -1,0 +1,79 @@
+[
+	{
+        "recipeId":"1",
+        "title":"Baked Chicken Nuggets",
+        "comment":"Chicken Nuggets is one of the kids favorite foods. The usual recipe means lots of oil and frying – especially if you buy the nuggets from a fast food restaurant. Don’t worry, there is a healthy alternative and it includes the same ingredients, just less oil and NO FRYING!",
+        "picture":"http://www.dailywt.com/wp-content/uploads/2013/07/5-Healthy-and-easy-to-prepare-kids-friendly-recipes_01.jpg",
+        "stars":5
+    },
+	{
+        "recipeId":"2",
+        "title":"Zucchini Boats",
+        "comment":"Packed with vitamins, this recipe is both healthy and tasty. It looks so good that your kids will love it at first sight – they won’t even notice all those vegetables inside.",
+        "picture":"http://www.dailywt.com/wp-content/uploads/2013/07/5-Healthy-and-easy-to-prepare-kids-friendly-recipes_03.jpg",
+        "stars":3
+    },
+	{
+        "recipeId":"3",
+        "title":"Pasta with Easy Meat Sauce",
+        "comment":"A healthy alternative to the traditional spaghetti and meat balls recipe. The key is in using fresh pasta and extra lean beef. As for the past choice – follow your kids preferences and choose anything they want from linguine, bow ties, wagon wheels, spaghetti etc.",
+        "picture":"http://www.dailywt.com/wp-content/uploads/2013/07/5-Healthy-and-easy-to-prepare-kids-friendly-recipes_05.jpg",
+        "stars":6
+    },
+	{
+        "recipeId":"4",
+        "title":"Mini Tuna Dinner Rolls",
+        "comment":"Ugh those hot dogs! Kids just live them and they are so unhealthy…Try to trick them into eating a healthy alternative dinner rolls filled with tuna and salad. It is worth to try it.",
+        "picture":"http://www.dailywt.com/wp-content/uploads/2013/07/5-Healthy-and-easy-to-prepare-kids-friendly-recipes_07.jpg",
+        "stars":1
+    },
+	{
+        "recipeId":"5",
+        "title":"Tomato Soup",
+        "comment":"Ready in 20 minutes, this fantastic soup will make your kids happy – especially if you serve it grilled cheese sandwiches. Prepare it for the whole family and enjoy the flavor.",
+        "picture":"http://www.dailywt.com/wp-content/uploads/2013/07/5-Healthy-and-easy-to-prepare-kids-friendly-recipes_10.jpg",
+        "stars":0
+    },
+	{
+        "recipeId":"6",
+        "title":"Hungarian goulash",
+        "comment":"Hungarian goulash or gulyás as the locals call it is probably the most well-known Hungarian dish. Make a big portion because it tastes even better on the next day if there will be any left.",
+        "picture":"http://www.topinspired.com/wp-content/uploads/2014/11/top-10-hungarian-recipes-011.jpg",
+        "stars":4
+    },
+	{
+        "recipeId":"7",
+        "title":"Green Pea Stew",
+        "comment":"One of the easiest Hungarian dishes to start with, is this stew. The best thing is that you can add fried egg for vegetarians or meatballs for meat eaters. Green peas can be replaced with green beans, potatoes or any of your favorite vegetables.",
+        "picture":"http://www.topinspired.com/wp-content/uploads/2014/11/top-10-hungarian-recipes-01.jpg",
+        "stars":5
+    },
+	{
+        "recipeId":"8",
+        "title":"Cold sour cherry soup",
+        "comment":"Make sure you let it cool down in the fridge before serving it. It won’t be easy since you will have the delicious scent in your home which will make you want to try it immediately.",
+        "picture":"http://www.topinspired.com/wp-content/uploads/2014/11/top-10-hungarian-dishes-03.jpg",
+        "stars":8
+    },
+	{
+        "recipeId":"9",
+        "title":"Strawberry-Filled Curd Cheese Dumplings",
+        "comment":"Hungarians eat these dumplings after a light soup as the second course. It is also delicious without strawberries served with creamy yogurt and icing sugar on the top.",
+        "picture":"http://www.topinspired.com/wp-content/uploads/2014/11/top-10-hungarian-food-06.jpg",
+        "stars":3
+    },
+	{
+        "recipeId":"10",
+        "title":"Chicken Paprikash",
+        "comment":"This dish is a kind of Hungarian stew. It is creamy, saucy and the sour cream adds an extra piquant flavor to it.",
+        "picture":"http://www.topinspired.com/wp-content/uploads/2014/11/top-10-hungarian-dishes-04.jpg",
+        "stars":3
+    },
+	{
+        "recipeId":"11",
+        "title":"Cheese spread – Körözött",
+        "comment":"It takes about 10 minutes to prepare this simple, delicious cheese spread. Perfect for sandwiches or use it as a dip with fresh vegetables.",
+        "picture":"http://www.topinspired.com/wp-content/uploads/2014/11/top-10-hungarian-dishes-05.jpg",
+        "stars":3
+    }
+]

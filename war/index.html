@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Hello, Google Cloud Messaging!</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+</head>
+
+<body role="document" style="padding-top: 70px;">
+
+<div class="container theme-showcase" role="main">
+
+    <div class="alert alert-success" style="visibility: collapse;" id="outputAlert"></div>
+
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Google Cloud Messaging</h1>
+
+                <p>Enter your message below and press "Send Message" button to send it over Google
+                    Cloud Messaging to all registered devices.</p>
+
+                <form method="get" action="/gcm">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-lg" placeholder="Message text" name="message"/>
+                          <span class="input-group-btn">
+                             <button class="btn btn-default btn-primary btn-group btn-lg" type="submit" id="sendMessageButton">Send  Message &raquo;</button>
+                          </span>
+                    </div>
+                </form>
+                <br/>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

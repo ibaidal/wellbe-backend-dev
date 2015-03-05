@@ -1,0 +1,34 @@
+[
+	{
+        "id":1,
+        "name":"Madrid",
+        "latitude":40.4000,
+        "longitude":-3.6833,
+        "description":"Population: 3.234 million",
+        "infoUrl":"http://en.wikipedia.org/wiki/Madrid"
+    },
+	{
+        "id":2,
+        "name":"Barcelona",
+        "latitude":41.3833,
+        "longitude":2.1833,
+        "description":"Population: 1.621 million",
+        "infoUrl":"http://en.wikipedia.org/wiki/Bacelona"
+    },
+	{
+        "id":3,
+        "name":"Cornellà de Llobregat",
+        "latitude":41.3500,
+        "longitude":2.0711,
+        "description":"Population: 87,458",
+        "infoUrl":"http://en.wikipedia.org/wiki/Cornell%C3%A0_de_Llobregat"
+    },
+	{
+        "id":4,
+        "name":"Paris",
+        "latitude":48.8567,
+        "longitude":2.3508,
+        "description":"Population: 2.211 million",
+        "infoUrl":"http://en.wikipedia.org/wiki/Paris"
+    }
+]
