@@ -1,6 +1,9 @@
 package com.axa.server.base.util;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 
@@ -35,6 +38,14 @@ public final class StringUtil {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static List<String> getStringListFromString(String text, String separator) {
+		String[] texts = text.split(separator);
+		for(String t : texts) {
+			t.trim();
+		}
+		return new ArrayList<String>(Arrays.asList(texts));
 	}
 
 }

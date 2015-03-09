@@ -1,6 +1,13 @@
 package com.axa.server.base.servlet;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServlet;
@@ -12,10 +19,15 @@ import com.axa.server.base.auth.Session;
 import com.axa.server.base.persistence.EMFService;
 import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.persistence.UserDAO;
+import com.axa.server.base.pods.Recipe;
 import com.axa.server.base.pods.User;
+import com.axa.server.base.response.Status;
+import com.axa.server.base.util.StringUtil;
+import com.axa.server.base.util.Utils;
 import com.axa.server.base.util.ValidationUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 
 @SuppressWarnings("serial")
@@ -34,20 +46,29 @@ public class UsersServlet extends HttpServlet {
 			user = Persistence.getUserById(userId);
 			
 			if (user == null) {
-				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+				//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+				resp.setContentType(Constants.CONTENT_TYPE_JSON);
+				resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));	
 			} else {
 				resp.setContentType(Constants.CONTENT_TYPE_JSON);
-				resp.getWriter().append(GSON.toJson(user));
+				resp.getWriter().append(GSON.toJson(Utils.getUserResponse(user)));
 			}
 			
 		} catch (Exception e) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			resp.setContentType(Constants.CONTENT_TYPE_JSON);
+			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse(null)));
 		}
 	}
 
 
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		doRegister(req, resp);		
+	}
+	
+	@Override
+	public void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		long userId = 0;
 		try {
 			String[] pathItems = req.getRequestURI().split("/");
@@ -57,14 +78,15 @@ public class UsersServlet extends HttpServlet {
 		} catch (Exception ignored) {
 			// Ignore
 		}
-
-		if (userId == 0) {
-			doRegister(req, resp);
-		} else if (!Session.checkSignature(req)) {
-			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-		} else {
+		
+		if (!Session.checkSignature(req)) {
+			//resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			resp.setContentType(Constants.CONTENT_TYPE_JSON);
+			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse(null)));
+		} else if (userId != 0) {
 			doUpdate(req, resp, userId);
-		}
+		}	
+		
 	}
 
 	
@@ -72,21 +94,28 @@ public class UsersServlet extends HttpServlet {
 		User user = new User();
 		user.setEmail(req.getParameter("email"));
 		user.setName(req.getParameter("name"));
-		user.setPhone(req.getParameter("phone"));
-		user.setAddress(req.getParameter("address"));
+		user.setPicture(req.getParameter("picture"));
+		user.setLanguage(req.getHeader("language"));
 		user.setPassword(req.getParameter("password"));
+		user.getGoals().addAll(StringUtil.getStringListFromString(req.getParameter("goals"), ","));
 				
-		if (ValidationUtil.anyEmpty(user.getName(), user.getEmail(), user.getPassword())) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
+		if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getEmail(), user.getPassword())) {
+			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
+			resp.setContentType(Constants.CONTENT_TYPE_JSON);
+			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Empty fields")));
 		} else if (!ValidationUtil.validateEmail(user.getEmail())) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid email");
+			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid email");
+			resp.setContentType(Constants.CONTENT_TYPE_JSON);
+			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Invalid email")));
 		} else if (Persistence.getUserByEmail(user.getEmail()) != null) {
-			resp.sendError(HttpServletResponse.SC_CONFLICT, "Email already registered");
+			//resp.sendError(HttpServletResponse.SC_CONFLICT, "Email already registered");
+			resp.setContentType(Constants.CONTENT_TYPE_JSON);
+			resp.getWriter().append(GSON.toJson(Utils.getConflictResponse("Email already registered")));
 		} else {
 			Persistence.insert(user);
 			Session.addNewTokenForUserId(user.getUserId(), resp);
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(user));
+			resp.getWriter().append(GSON.toJson(Utils.getCreateUserResponse(user)));
 		}
 	}
 
@@ -100,19 +129,28 @@ public class UsersServlet extends HttpServlet {
 			User user = UserDAO.byId(em, userId);
 			
 			if (user == null) {
-				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-				
-			} else {
+				//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+				resp.setContentType(Constants.CONTENT_TYPE_JSON);
+				resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));			
+			} else {				
 				user.setName(req.getParameter("name"));
-				user.setPhone(req.getParameter("phone"));
-				user.setAddress(req.getParameter("address"));
-	
-				if (ValidationUtil.isEmpty(user.getName())) {
-					resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
+				user.setPicture(req.getParameter("picture"));
+				user.setLanguage(req.getHeader("language"));
+				user.setPassword(req.getParameter("password"));
+				user.setGoals(StringUtil.getStringListFromString(req.getParameter("goals"), ","));
+				
+				if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getPassword())) {
+					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
+					resp.setContentType(Constants.CONTENT_TYPE_JSON);
+					resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Empty fields")));
+				} else if (!user.getEmail().equalsIgnoreCase(req.getParameter("email"))) {
+					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid email");
+					resp.setContentType(Constants.CONTENT_TYPE_JSON);
+					resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Invalid email")));
 				} else {
 					em.persist(user);
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(user));
+					resp.getWriter().append(GSON.toJson(Utils.getUpdateUserResponse(user)));
 				}
 			}
 			

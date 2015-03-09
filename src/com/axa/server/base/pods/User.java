@@ -1,5 +1,8 @@
 package com.axa.server.base.pods;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,10 +20,10 @@ public class User {
 	@Expose private Long   userId;
 	@Expose private String email;
 	@Expose private String name;
-	@Expose private String phone;
-	@Expose private String address;
+	@Expose private String picture;
+	@Expose private String language;
 	@Expose private String fbId;
-	@Expose private String gpId;
+	@Expose private List<String> goals = new ArrayList<String>();
 
 	private String password;
 	private String emailLowerCase;
@@ -76,20 +79,21 @@ public class User {
 		this.name = name;
 	}
 
-	public String getPhone() {
-		return phone;
+
+	public String getPicture() {
+		return picture;
 	}
 
-	public void setPhone(String phone) {
-		this.phone = phone;
+	public void setPicture(String picture) {
+		this.picture = picture;
 	}
 
-	public String getAddress() {
-		return address;
+	public String getLanguage() {
+		return language;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 
 	public String getFbId() {
@@ -100,12 +104,12 @@ public class User {
 		this.fbId = fbId;
 	}
 
-	public String getGpId() {
-		return gpId;
+	public List<String> getGoals() {
+		return goals;
 	}
 
-	public void setGpId(String gpId) {
-		this.gpId = gpId;
+	public void setGoals(List<String> goals) {
+		this.goals = goals;
 	}
 
 }

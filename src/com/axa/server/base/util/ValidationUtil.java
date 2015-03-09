@@ -1,6 +1,9 @@
 package com.axa.server.base.util;
 
+import java.util.List;
 import java.util.regex.Pattern;
+
+import com.axa.server.base.pods.Goal;
 
 
 public final class ValidationUtil {
@@ -13,13 +16,27 @@ public final class ValidationUtil {
 	}
 	
 	
-	public static boolean anyEmpty(String... strs) {
+	public static boolean anyEmpty(String... strs) {		
 		for (String str : strs) {
 			if (isEmpty(str)) {
 				return true;
 			}
 		}
+		
 		return false;
+	}
+
+	
+	public static boolean anyEmpty(List<String> goals, String... strs) {
+		boolean empty = goals.isEmpty();
+		
+		for (String str : strs) {
+			if (isEmpty(str)) {
+				empty = true;
+			}
+		}
+		
+		return empty;
 	}
 
 

@@ -10,7 +10,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<extension>json</extension>
 		<mime-type>text/json; charset=UTF-8</mime-type>
 	</mime-mapping>
-
+	
 	
 	<filter>
         <filter-name>logFilter</filter-name>
@@ -32,7 +32,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
     </servlet-mapping>
     
     
-    <servlet>
+   	<servlet>
         <servlet-name>login</servlet-name>
         <servlet-class>com.axa.server.base.servlet.LoginServlet</servlet-class>
     </servlet>
@@ -41,7 +41,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
         <url-pattern>/login/*</url-pattern>
     </servlet-mapping>
     
-    
+
     <servlet>
         <servlet-name>users</servlet-name>
         <servlet-class>com.axa.server.base.servlet.UsersServlet</servlet-class>

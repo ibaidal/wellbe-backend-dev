@@ -1,0 +1,36 @@
+{
+    "status": {
+        "code": 200,
+        "message": "ok",
+        "description": "User logged"
+    },
+    "token": "ba3992736a3ff6a7ad3758f06dab6a40",
+    "data": {
+        "user": {
+            "userId": "56146sd51f6sdf46s5f1",
+            "email": "roman.rodriguez@axa-groupsolutions.com",
+            "name": "Roman Rodriguez",
+            "picture": "url path",
+            "language": "ISO code for the user language",
+            "goals": [
+                "nutrition",
+                "social wellbeing",
+                "healthcare and wellness",
+                "physical activity",
+                "mental activity"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "getBoosts",
+            "URI": "/boosts",
+            "method": "GET"
+        },
+        {
+            "rel": "getBoost",
+            "URI": "/boost/{boostId}",
+            "method": "GET"
+        }
+    ]
+}

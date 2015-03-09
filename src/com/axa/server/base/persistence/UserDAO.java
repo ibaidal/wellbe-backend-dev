@@ -1,5 +1,6 @@
 package com.axa.server.base.persistence;
 
+
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
@@ -42,5 +43,6 @@ public class UserDAO {
 			return null;
 		}
 	}
+	
 
 }
