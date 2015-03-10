@@ -5,10 +5,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by rrodriguez on 17/02/2015.
- */
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 
+import com.google.gson.annotations.Expose;
+
+
+@Entity
 public class Boost {
 
     public static enum Status {
@@ -17,20 +24,22 @@ public class Boost {
 
     };
 
-    private String boostId;
-    private String title;
-    private String picture;
-    private String goal;
-    private String ownerId;
-    private String status = Status.NEW.toString();
-    private Date creation;
-    private Date start;
-    private Date end;
+    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Expose private Long boostId;
+    @Expose private String title;
+    @Expose private String picture;
+    @Expose private String goal;
+    @Expose private Long ownerId;
+    @Expose private String status = Status.NEW.toString();
+    @Expose private Date creation;
+    @Expose private Date start;
+    @Expose private Date end;
 
+	
     public Boost() {
     }
 
-    public Boost(String boostId, String title, String picture, String goal, String ownerId,
+    public Boost(Long boostId, String title, String picture, String goal, Long ownerId,
                  String status, Date creation, Date start, Date end) {
         this.boostId = boostId;
         this.title = title;
@@ -43,12 +52,13 @@ public class Boost {
         this.end = end;
     }
 
-    /**
+
+	/**
      *
      * @return
      * The boostId
      */
-    public String getBoostId() {
+    public Long getBoostId() {
         return boostId;
     }
 
@@ -57,7 +67,7 @@ public class Boost {
      * @param boostId
      * The boostId
      */
-    public void setBoostId(String boostId) {
+    public void setBoostId(Long boostId) {
         this.boostId = boostId;
     }
 
@@ -120,7 +130,7 @@ public class Boost {
      * @return
      * The ownerId
      */
-    public String getOwnerId() {
+    public Long getOwnerId() {
         return ownerId;
     }
 
@@ -129,7 +139,7 @@ public class Boost {
      * @param ownerId
      * The ownerId
      */
-    public void setOwnerId(String ownerId) {
+    public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
 

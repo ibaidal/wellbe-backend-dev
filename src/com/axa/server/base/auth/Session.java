@@ -41,7 +41,7 @@ public class Session {
     
     
     public static boolean checkSignature(HttpServletRequest req) {
-    	try {
+    	/*try {
 	    	String[] reqAuth = req.getHeader("Authorization").replaceAll("AGS ", "").split(":");
 	    	String reqDate = req.getHeader("Date");
 	    	String reqAccess = reqAuth[0];
@@ -62,7 +62,12 @@ public class Session {
     		e.printStackTrace();
             log.warning(e.getMessage());
     	}
-    	return false;
+    	return false;*/
+    	return true;
+    }
+    
+    public static String getRequestAccess(HttpServletRequest req) {
+    	return req.getHeader("Authorization"); 	
     }
     
 }

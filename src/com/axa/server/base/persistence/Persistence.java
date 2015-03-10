@@ -9,6 +9,7 @@ import com.axa.server.base.pods.Gcm;
 import com.axa.server.base.pods.Recipe;
 import com.axa.server.base.pods.Token;
 import com.axa.server.base.pods.User;
+import com.axa.server.base.pods.Boost;
 
 
 public class Persistence {
@@ -178,6 +179,33 @@ public class Persistence {
 		EntityManager em = EMFService.createEntityManager();
 		try {
 			return RecipeDAO.byId(em, recipeId);
+		} catch (NoResultException e) {
+	        return null;
+	    } finally {
+			em.close();
+	    }
+	}
+
+
+	public static List<Boost> getBoostsbyOwner(long userId) {
+		EntityManager em = EMFService.createEntityManager();
+		List<Boost> list = BoostDAO.byOwner(em, userId);
+		em.close();
+		return list;
+	}
+	
+	public static List<Boost> getAllBoosts() {
+		EntityManager em = EMFService.createEntityManager();
+		List<Boost> list = BoostDAO.fetchAll(em);
+		em.close();
+		return list;
+	}
+	
+	
+	public static Boost getBoostById(long boostId) {
+		EntityManager em = EMFService.createEntityManager();
+		try {
+			return BoostDAO.byId(em, boostId);
 		} catch (NoResultException e) {
 	        return null;
 	    } finally {

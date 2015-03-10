@@ -53,6 +53,15 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
     
     
     <servlet>
+        <servlet-name>boosts</servlet-name>
+        <servlet-class>com.axa.server.base.servlet.BoostsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>boosts</servlet-name>
+        <url-pattern>/boosts/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
         <servlet-name>recipes</servlet-name>
         <servlet-class>com.axa.server.base.servlet.RecipesServlet</servlet-class>
     </servlet>

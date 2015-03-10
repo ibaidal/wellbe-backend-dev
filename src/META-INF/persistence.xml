@@ -10,6 +10,7 @@
         <class>com.axa.server.base.pods.Recipe</class>
         <class>com.axa.server.base.pods.Token</class>
         <class>com.axa.server.base.pods.User</class>
+        <class>com.axa.server.base.pods.Boost</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="datanucleus.NontransactionalRead" value="true"/>

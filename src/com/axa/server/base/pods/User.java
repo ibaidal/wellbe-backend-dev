@@ -9,7 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Transient;
 
+import com.google.appengine.api.datastore.Blob;
 import com.google.gson.annotations.Expose;
 
 
@@ -17,10 +19,11 @@ import com.google.gson.annotations.Expose;
 public class User {
 
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Expose private Long   userId;
+	@Expose private Long userId;
 	@Expose private String email;
 	@Expose private String name;
-	@Expose private String picture;
+	@Expose @Transient private String picture;	
+	private Blob pictureBlob;	
 	@Expose private String language;
 	@Expose private String fbId;
 	@Expose private List<String> goals = new ArrayList<String>();
@@ -37,6 +40,7 @@ public class User {
 		} else {
 			emailLowerCase = null;
 		}
+		
 	}
 
 	public Long getUserId() {
@@ -86,6 +90,14 @@ public class User {
 
 	public void setPicture(String picture) {
 		this.picture = picture;
+	}
+
+	public Blob getPictureBlob() {
+		return pictureBlob;
+	}
+
+	public void setPictureBlob(Blob pictureBlob) {
+		this.pictureBlob = pictureBlob;
 	}
 
 	public String getLanguage() {

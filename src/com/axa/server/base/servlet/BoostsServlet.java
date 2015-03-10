@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -15,34 +14,30 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.IOUtils;
-
 import com.axa.server.base.Constants;
 import com.axa.server.base.auth.Session;
 import com.axa.server.base.persistence.EMFService;
 import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.persistence.UserDAO;
+import com.axa.server.base.pods.Boost;
 import com.axa.server.base.pods.Recipe;
+import com.axa.server.base.pods.Token;
 import com.axa.server.base.pods.User;
 import com.axa.server.base.response.Status;
 import com.axa.server.base.util.StringUtil;
 import com.axa.server.base.util.Utils;
 import com.axa.server.base.util.ValidationUtil;
-import com.google.appengine.api.datastore.Blob;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 
 @SuppressWarnings("serial")
-public class UsersServlet extends HttpServlet {
+public class BoostsServlet extends HttpServlet {
 
 	private static final Gson GSON = new GsonBuilder().
 			setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ").
-			excludeFieldsWithoutExposeAnnotation().create();  
+			excludeFieldsWithoutExposeAnnotation().create(); 
 	
 
 	@Override
@@ -54,57 +49,109 @@ public class UsersServlet extends HttpServlet {
 			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse(null)));
 		}
 		else {
-			User user = null;
-			
 			try {
-				String[] pathItems = req.getRequestURI().split("/");
-				long userId = pathItems.length > 2 ? Long.parseLong(pathItems[2]) : -1;
-				String action = pathItems.length > 3 ? pathItems[3] : null;
-				user = Persistence.getUserById(userId);	
-						
 				
-				if (user == null) {
-					//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));	
-				} else if ("picture".equals(action)) {
-					resp.setContentType("image/*");
-					if (user.getPictureBlob() == null) {
+				Boost boost = null;
+				long boostId = 0;
+				
+				String[] pathItems = req.getRequestURI().split("/");
+				if (pathItems.length > 2) {
+					boostId = Long.parseLong(pathItems[2]);
+					boost = Persistence.getBoostById(boostId);
+					
+					if (boost == null) {
 						//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 						resp.setContentType(Constants.CONTENT_TYPE_JSON);
 						resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));	
 					} else {
-						resp.getOutputStream().write(user.getPictureBlob().getBytes());
+						
+						// Add Users Mockup to DB						
+						if(Persistence.getUserByEmail("fake.one@axa.com") == null) {
+							Utils.createFackeUserOne();
+							Utils.createFackeUserTwo();
+						}
+						
+						User user = Persistence.getUserById(boost.getOwnerId());
+						List<Boost> boosts = new ArrayList<Boost>();
+						boosts.add(boost);
+						List<User> users = new ArrayList<User>();
+						setPictureURL(user, req);
+						users.add(user);
+						User aux = Persistence.getUserByEmail("fake.one@axa.com");
+						aux.setPicture(Utils.fake_picture_one);
+						users.add(aux);
+						aux = Persistence.getUserByEmail("fake.two@axa.com");
+						aux.setPicture(Utils.fake_picture_two);
+						users.add(aux);
+						
+						// One Boost
+						resp.setContentType(Constants.CONTENT_TYPE_JSON);
+						resp.getWriter().append(GSON.toJson(Utils.getUserBoostListResponse(boosts, users)));
 					}
-				} else {
-					setPictureURL(user, req);
-					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(Utils.getUserResponse(user)));
+					
 				}
+				else {
+					// LIST OF BOOSTS
+					Token token = Persistence.getTokenByAccess(Session.getRequestAccess(req));
+					User user = Persistence.getUserById(token.getUserId());
+					List<Boost> boosts = Persistence.getAllBoosts();
+					List<User> users = new ArrayList<User>();
+					setPictureURL(user, req);
+					users.add(user);
+					User aux = Persistence.getUserByEmail("fake.one@axa.com");
+					aux.setPicture(Utils.fake_picture_one);
+					users.add(aux);
+					aux = Persistence.getUserByEmail("fake.two@axa.com");
+					aux.setPicture(Utils.fake_picture_two);
+					users.add(aux);
+					
+					resp.setContentType(Constants.CONTENT_TYPE_JSON);
+					resp.getWriter().append(GSON.toJson(Utils.getUserBoostListResponse(boosts, users)));				
+				}
+									
 				
 			} catch (Exception e) {
 				//resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				resp.setContentType(Constants.CONTENT_TYPE_JSON);
 				resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse(null)));
-			}	
+			}
 		}
-		
 
+	}
+	
+	private void setPictureURL(User user, HttpServletRequest req) {
+		if (user.getPictureBlob() == null) {
+			user.setPicture(null);
+		} else {
+			String idCompPath = "/" + user.getUserId();
+			String url = req.getRequestURL().toString();
+			if (url.contains(String.valueOf(idCompPath))) {
+				url = url.substring(0, url.indexOf(idCompPath));
+			}
+			user.setPicture(url + idCompPath + "/picture");
+		}
 	}
 
 
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		doRegister(req, resp);		
+		resp.setHeader("Allow", "GET");
+		resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		
+		//doRegister(req, resp);		
 	}
 	
 	@Override
 	public void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		long userId = 0;
+		
+		resp.setHeader("Allow", "GET");
+		resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		
+		/*long boostId = 0;
 		try {
 			String[] pathItems = req.getRequestURI().split("/");
 			if (pathItems.length > 2) {
-				userId = Long.parseLong(pathItems[2]);
+				boostId = Long.parseLong(pathItems[2]);
 			}
 		} catch (Exception ignored) {
 			// Ignore
@@ -114,54 +161,21 @@ public class UsersServlet extends HttpServlet {
 			//resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
 			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse(null)));
-		} else if (userId != 0) {
-			doUpdate(req, resp, userId);
-		} else {
-			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse(null)));
-		}
+		} else if (boostId != 0) {
+			doUpdate(req, resp, boostId);
+		}*/	
 		
 	}
 
 	
 	public void doRegister(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-				
 		User user = new User();
-		
-		try {
-			ServletFileUpload upload = new ServletFileUpload();
-			FileItemIterator iterator = upload.getItemIterator(req);
-			
-			while (iterator.hasNext()) {
-				FileItemStream item = iterator.next();
-				String name = item.getFieldName();
-				InputStream is = item.openStream();
-				
-				if (item.isFormField()) {
-					String value = IOUtils.toString(is, "UTF-8");
-					if ("email".equals(name)) {
-						user.setEmail(value);
-					} else if ("name".equals(name)) {
-						user.setName(value);
-					} else if ("password".equals(name)) {
-						user.setPassword(value);
-					} else if ("goals".equals(name)) {
-						user.setPassword(value);
-						user.getGoals().addAll(StringUtil.getStringListFromString(value, ","));
-					}					
-				} else if ("picture".equals(name)) {
-					user.setPictureBlob(new Blob(IOUtils.toByteArray(is)));
-				}
-								
-			}
-			
-			user.setLanguage(req.getHeader("language"));
-			
-		} catch (Exception e) {
-			throw new IOException(e);
-		}
-		
+		user.setEmail(req.getParameter("email"));
+		user.setName(req.getParameter("name"));
+		user.setPicture(req.getParameter("picture"));
+		user.setLanguage(req.getHeader("language"));
+		user.setPassword(req.getParameter("password"));
+		user.getGoals().addAll(StringUtil.getStringListFromString(req.getParameter("goals"), ","));
 				
 		if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getEmail(), user.getPassword())) {
 			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
@@ -175,41 +189,17 @@ public class UsersServlet extends HttpServlet {
 			//resp.sendError(HttpServletResponse.SC_CONFLICT, "Email already registered");
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
 			resp.getWriter().append(GSON.toJson(Utils.getConflictResponse("Email already registered")));
-		} else {			
+		} else {						
 			Persistence.insert(user);
-			setPictureURL(user, req);
 			Session.addNewTokenForUserId(user.getUserId(), resp);
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
 			resp.getWriter().append(GSON.toJson(Utils.getCreateUserResponse(user)));
-			
-			User owner = Persistence.getUserByEmail("fake.one@axa.com");
-			// Add Users Mockup to DB						
-			if(owner == null) {
-				Utils.createFackeUserOne();
-				Utils.createFackeUserTwo();
-				owner = Persistence.getUserByEmail("fake.one@axa.com");
-				owner = Persistence.getUserByEmail("fake.two@axa.com");
-			}
 			
 			
 			// Add Boost Mockup to DB
 			Utils.createNewBoost(user);
 			Utils.createDoingBoosts(user);
 			Utils.createDoneBoosts(user);
-		}
-		
-	}
-	
-	private void setPictureURL(User user, HttpServletRequest req) {
-		if (user.getPictureBlob() == null) {
-			user.setPicture(null);
-		} else {
-			String idCompPath = "/" + user.getUserId();
-			String url = req.getRequestURL().toString();
-			if (url.contains(String.valueOf(idCompPath))) {
-				url = url.substring(0, url.indexOf(idCompPath));
-			}
-			user.setPicture(url + idCompPath + "/picture");
 		}
 	}
 
@@ -227,39 +217,11 @@ public class UsersServlet extends HttpServlet {
 				resp.setContentType(Constants.CONTENT_TYPE_JSON);
 				resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));			
 			} else {				
-
-				try {
-					ServletFileUpload upload = new ServletFileUpload();
-					FileItemIterator iterator = upload.getItemIterator(req);
-					
-					while (iterator.hasNext()) {
-						FileItemStream item = iterator.next();
-						String name = item.getFieldName();
-						InputStream is = item.openStream();
-						
-						if (item.isFormField()) {
-							String value = IOUtils.toString(is, "UTF-8");
-							if ("email".equals(name)) {
-								user.setEmail(value);
-							} else if ("name".equals(name)) {
-								user.setName(value);
-							} else if ("password".equals(name)) {
-								user.setPassword(value);
-							} else if ("goals".equals(name)) {
-								user.setPassword(value);
-								user.setGoals(StringUtil.getStringListFromString(value, ","));
-							}					
-						} else if ("picture".equals(name)) {
-							user.setPictureBlob(new Blob(IOUtils.toByteArray(is)));
-						}
-										
-					}
-					
-					user.setLanguage(req.getHeader("language"));
-					
-				} catch (Exception e) {
-					throw new IOException(e);
-				}
+				user.setName(req.getParameter("name"));
+				user.setPicture(req.getParameter("picture"));
+				user.setLanguage(req.getHeader("language"));
+				user.setPassword(req.getParameter("password"));
+				user.setGoals(StringUtil.getStringListFromString(req.getParameter("goals"), ","));
 				
 				if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getPassword())) {
 					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
@@ -271,7 +233,6 @@ public class UsersServlet extends HttpServlet {
 					resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Invalid email")));
 				} else {
 					em.persist(user);
-					setPictureURL(user, req);					
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);
 					resp.getWriter().append(GSON.toJson(Utils.getUpdateUserResponse(user)));
 				}

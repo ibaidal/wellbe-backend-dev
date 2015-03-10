@@ -42,14 +42,10 @@ public class LoginServlet extends HttpServlet {
 	private static final Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create(); 
 
 	private static final String FACEBOOK_USER_URL = "https://graph.facebook.com/me?access_token=%s";
+	private static final String FACEBOOK_USER_PICTURE_URL = "http://graph.facebook.com/%s/picture?height=" + 
+			String.valueOf(Constants.IMAGE_MAX_SIZE_PX) + "&width=" + 
+			String.valueOf(Constants.IMAGE_MAX_SIZE_PX) + "&type=square";
 
-	
-	private static class PassAXAToken {
-		@Expose public String email;
-		@Expose public String timestamp;
-		@Expose public String apptoken;
-		@Expose public String token;
-	}
 	
 	
 	@Override
@@ -96,12 +92,6 @@ public class LoginServlet extends HttpServlet {
 	}
 	
 	
-	private String userNameFromEmail(String email) {
-		return (email == null)
-			? null
-			: WordUtils.capitalizeFully(email.split("@")[0].replaceAll("\\.", " "));
-	}
-	
 	
 	private User facebookLogin(String userId, String token) {
 		if (ValidationUtil.anyEmpty(userId, token)) return null;
@@ -130,6 +120,7 @@ public class LoginServlet extends HttpServlet {
 					user.setEmail(fbUser.email);
 					user.setFbId(fbUser.id);
 					user.setName((fbUser.first_name + " " + fbUser.last_name).trim());
+					// TODO GET FACEBOOK USER PROFILE PICTURE
 					em.persist(user);	
 					
 				} else if (ValidationUtil.isEmpty(user.getFbId())) {
