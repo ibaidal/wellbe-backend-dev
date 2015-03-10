@@ -77,12 +77,6 @@ public class BoostsServlet extends HttpServlet {
 						List<User> users = new ArrayList<User>();
 						setPictureURL(user, req);
 						users.add(user);
-						User aux = Persistence.getUserByEmail("fake.one@axa.com");
-						aux.setPicture(Utils.fake_picture_one);
-						users.add(aux);
-						aux = Persistence.getUserByEmail("fake.two@axa.com");
-						aux.setPicture(Utils.fake_picture_two);
-						users.add(aux);
 						
 						// One Boost
 						resp.setContentType(Constants.CONTENT_TYPE_JSON);
@@ -92,7 +86,7 @@ public class BoostsServlet extends HttpServlet {
 				}
 				else {
 					// LIST OF BOOSTS
-					Token token = Persistence.getTokenByAccess(Session.getRequestAccess(req));
+					Token token = Session.getToken(req);
 					User user = Persistence.getUserById(token.getUserId());
 					List<Boost> boosts = Persistence.getAllBoosts();
 					List<User> users = new ArrayList<User>();
