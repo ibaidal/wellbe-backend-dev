@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServlet;
@@ -35,6 +36,8 @@ import com.google.gson.reflect.TypeToken;
 @SuppressWarnings("serial")
 public class BoostsServlet extends HttpServlet {
 
+	private static final Logger log = Logger.getLogger(BoostsServlet.class.getName());
+	
 	private static final Gson GSON = new GsonBuilder().
 			setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ").
 			excludeFieldsWithoutExposeAnnotation().create(); 
@@ -65,6 +68,8 @@ public class BoostsServlet extends HttpServlet {
 						
 					} else {
 						
+						log.warning(boost.toString());
+						
 						// Add Users Mockup to DB						
 						if(Persistence.getUserByEmail("fake.one@axa.com") == null) {
 							Utils.createFackeUserOne();
@@ -84,11 +89,17 @@ public class BoostsServlet extends HttpServlet {
 					}
 					
 				}
-				else {
+				else {					
 					// LIST OF BOOSTS
 					Token token = Session.getToken(req);
+					log.warning(token.toString());
+					
 					User user = Persistence.getUserById(token.getUserId());
-					List<Boost> boosts = Persistence.getAllBoosts();
+					log.warning(user.toString());
+					
+					List<Boost> boosts = Persistence.getAllBoosts();					
+					log.warning(""+boosts.size());
+					
 					List<User> users = new ArrayList<User>();
 					setPictureURL(user, req);
 					users.add(user);
@@ -98,6 +109,9 @@ public class BoostsServlet extends HttpServlet {
 					aux = Persistence.getUserByEmail("fake.two@axa.com");
 					aux.setPicture(Utils.fake_picture_two);
 					users.add(aux);
+					
+					log.warning(boosts.toString());
+					log.warning(users.toString());
 					
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);
 					resp.getWriter().append(GSON.toJson(Utils.getUserBoostListResponse(boosts, users)));				

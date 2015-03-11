@@ -61,12 +61,14 @@ public class Session {
 	    	String calcSignature = Base64.encodeBase64String(HmacUtils.hmacSha1(token.getSecret(), reqDate));
 	    	
 	    	if (calcSignature.equals(reqSignature)) {
+	    		log.warning("check true");
 				return true;
 			}	    	
     	} catch (Exception e) {
     		e.printStackTrace();
             log.warning(e.getMessage());
     	}
+		log.warning("check false");
     	return false;
     }
     
