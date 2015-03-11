@@ -65,7 +65,8 @@ public class LoginServlet extends HttpServlet {
 		if ("facebook".equals(action)) {
 			user = facebookLogin(
 					req.getParameter("userId"),
-					req.getParameter("token"));
+					req.getParameter("token"),
+					resp);
 			
 		} else {
 			user = appLogin(
@@ -75,9 +76,9 @@ public class LoginServlet extends HttpServlet {
 		
 		if (user == null) {
 			log.warning("Login failed");
-			//resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid credentials");			
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse("Invalid credentials")));	
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse("Invalid credentials"));
+			
 		} else {
 			Session.addNewTokenForUserId(user.getUserId(), resp);
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
@@ -93,7 +94,7 @@ public class LoginServlet extends HttpServlet {
 	
 	
 	
-	private User facebookLogin(String userId, String token) {
+	private User facebookLogin(String userId, String token, HttpServletResponse resp) throws IOException {
 		if (ValidationUtil.anyEmpty(userId, token)) return null;
 
 		User user = null;
@@ -110,33 +111,39 @@ public class LoginServlet extends HttpServlet {
 		if (fbUser != null) {
 			EntityManager em = EMFService.createEntityManager();
 			
-			try {
-				em.getTransaction().begin();
+						
 				user = UserDAO.byEmail(em, fbUser.email);
 				
 				if (user == null) {
-					// Register
+					/*// Register
 					user = new User();
 					user.setEmail(fbUser.email);
 					user.setFbId(fbUser.id);
 					user.setName((fbUser.first_name + " " + fbUser.last_name).trim());
 					// TODO GET FACEBOOK USER PROFILE PICTURE
-					em.persist(user);	
+					em.persist(user);	*/
+					
+					Utils.sendError(resp, GSON, Utils.NO_SUCH_ACCOUNT, 
+							Utils.getNoSuchAccountResponse("The email address doesn’t exist."));
 					
 				} else if (ValidationUtil.isEmpty(user.getFbId())) {
-					user.setFbId(fbUser.id);
-					em.persist(user);	
+					try {	
+						em.getTransaction().begin();
+						
+						user.setFbId(fbUser.id);
+						em.persist(user);						
+						
+				    	em.flush();
+				    	em.getTransaction().commit();
+			    	
+					} catch (Exception e) {
+				    	em.getTransaction().rollback();	
+				    	throw e;
+				    } finally {
+						em.close();
+				    }
 				}
-				
-		    	em.flush();
-		    	em.getTransaction().commit();
 			
-			} catch (Exception e) {
-		    	em.getTransaction().rollback();	
-		    	throw e;
-		    } finally {
-				em.close();
-		    }
 		}
 		
 		return user;

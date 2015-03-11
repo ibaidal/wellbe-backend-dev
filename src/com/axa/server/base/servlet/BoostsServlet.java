@@ -44,9 +44,9 @@ public class BoostsServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		
 		if (!Session.checkSignature(req)) {
-			//resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse(null)));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse(null));
+			
 		}
 		else {
 			try {
@@ -60,9 +60,9 @@ public class BoostsServlet extends HttpServlet {
 					boost = Persistence.getBoostById(boostId);
 					
 					if (boost == null) {
-						//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-						resp.setContentType(Constants.CONTENT_TYPE_JSON);
-						resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));	
+						
+						Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
+						
 					} else {
 						
 						// Add Users Mockup to DB						
@@ -105,9 +105,9 @@ public class BoostsServlet extends HttpServlet {
 									
 				
 			} catch (Exception e) {
-				//resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				resp.setContentType(Constants.CONTENT_TYPE_JSON);
-				resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse(null)));
+				
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse(null));
+				
 			}
 		}
 
@@ -152,9 +152,9 @@ public class BoostsServlet extends HttpServlet {
 		}
 		
 		if (!Session.checkSignature(req)) {
-			//resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse(null)));
+		
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse(null));
+			
 		} else if (boostId != 0) {
 			doUpdate(req, resp, boostId);
 		}*/	
@@ -172,17 +172,17 @@ public class BoostsServlet extends HttpServlet {
 		user.getGoals().addAll(StringUtil.getStringListFromString(req.getParameter("goals"), ","));
 				
 		if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getEmail(), user.getPassword())) {
-			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Empty fields")));
+
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Empty fields"));
+			
 		} else if (!ValidationUtil.validateEmail(user.getEmail())) {
-			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid email");
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Invalid email")));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Invalid email"));
+			
 		} else if (Persistence.getUserByEmail(user.getEmail()) != null) {
-			//resp.sendError(HttpServletResponse.SC_CONFLICT, "Email already registered");
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getConflictResponse("Email already registered")));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_CONFLICT, Utils.getConflictResponse("Email already registered"));
+			
 		} else {						
 			Persistence.insert(user);
 			Session.addNewTokenForUserId(user.getUserId(), resp);
@@ -207,9 +207,9 @@ public class BoostsServlet extends HttpServlet {
 			User user = UserDAO.byId(em, userId);
 			
 			if (user == null) {
-				//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-				resp.setContentType(Constants.CONTENT_TYPE_JSON);
-				resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));			
+				
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
+				
 			} else {				
 				user.setName(req.getParameter("name"));
 				user.setPicture(req.getParameter("picture"));
@@ -218,13 +218,13 @@ public class BoostsServlet extends HttpServlet {
 				user.setGoals(StringUtil.getStringListFromString(req.getParameter("goals"), ","));
 				
 				if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getPassword())) {
-					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
-					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Empty fields")));
+					
+					Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Empty fields"));
+					
 				} else if (!user.getEmail().equalsIgnoreCase(req.getParameter("email"))) {
-					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid email");
-					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Invalid email")));
+					
+					Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Invalid email"));
+					
 				} else {
 					em.persist(user);
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);

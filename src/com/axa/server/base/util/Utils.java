@@ -9,6 +9,11 @@ import java.util.List;
 
 
 
+
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.axa.server.base.Constants;
 import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.pods.Boost;
 import com.axa.server.base.pods.User;
@@ -16,12 +21,21 @@ import com.axa.server.base.pods.UserBoosts;
 import com.axa.server.base.response.Link;
 import com.axa.server.base.response.Status;
 import com.axa.server.base.response.WellBeResponse;
+import com.google.gson.Gson;
 
 
 public final class Utils {
 	
+	public static final int NO_SUCH_ACCOUNT = 212;
+	
 	public static final String fake_picture_one = "http://crackberry.com/sites/crackberry.com/files/styles/large/public/topic_images/2013/ANDROID.png";
 	public static final String fake_picture_two = "https://lh3.googleusercontent.com/-0s48FykazSM/AAAAAAAAAAI/AAAAAAAAALg/aJ0-vobQsCI/photo.jpg";
+	
+	public static void sendError(HttpServletResponse resp, Gson GSON, int status, WellBeResponse<Void> entity) throws IOException {
+		resp.setStatus(status);
+		resp.setContentType(Constants.CONTENT_TYPE_JSON);
+		resp.getWriter().append(GSON.toJson(entity));	
+	}
 	
 	public static void createFackeUserOne() {
 		User user = new User();
@@ -234,5 +248,14 @@ public final class Utils {
 	}
 	
 
+	public static WellBeResponse<Void> getNoSuchAccountResponse(String description) throws IOException {
+		WellBeResponse<Void> response = new WellBeResponse<Void>();	
+		
+		response.setStatus(new Status(NO_SUCH_ACCOUNT, "No Such Account", description));	
+		response.setLinks(null);
+		
+		return response;
+	}
+	
 
 }

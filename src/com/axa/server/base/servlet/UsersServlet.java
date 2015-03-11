@@ -49,9 +49,9 @@ public class UsersServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		
 		if (!Session.checkSignature(req)) {
-			//resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse(null)));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse(null));
+			
 		}
 		else {
 			User user = null;
@@ -64,15 +64,15 @@ public class UsersServlet extends HttpServlet {
 						
 				
 				if (user == null) {
-					//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));	
+
+					Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
+					
 				} else if ("picture".equals(action)) {
 					resp.setContentType("image/*");
 					if (user.getPictureBlob() == null) {
-						//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-						resp.setContentType(Constants.CONTENT_TYPE_JSON);
-						resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));	
+						
+						Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
+						
 					} else {
 						resp.getOutputStream().write(user.getPictureBlob().getBytes());
 					}
@@ -83,9 +83,9 @@ public class UsersServlet extends HttpServlet {
 				}
 				
 			} catch (Exception e) {
-				//resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				resp.setContentType(Constants.CONTENT_TYPE_JSON);
-				resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse(null)));
+
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse(null));
+				
 			}	
 		}
 		
@@ -111,15 +111,15 @@ public class UsersServlet extends HttpServlet {
 		}
 		
 		if (!Session.checkSignature(req)) {
-			//resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getUnauthorizedResponse(null)));
+
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse(null));
+			
 		} else if (userId != 0) {
 			doUpdate(req, resp, userId);
 		} else {
-			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse(null)));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse(null));
+			
 		}
 		
 	}
@@ -164,17 +164,17 @@ public class UsersServlet extends HttpServlet {
 		
 				
 		if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getEmail(), user.getPassword())) {
-			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Empty fields")));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Empty fields"));	
+			
 		} else if (!ValidationUtil.validateEmail(user.getEmail())) {
-			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid email");
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Invalid email")));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Invalid email"));
+			
 		} else if (Persistence.getUserByEmail(user.getEmail()) != null) {
-			//resp.sendError(HttpServletResponse.SC_CONFLICT, "Email already registered");
-			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getConflictResponse("Email already registered")));
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_CONFLICT, Utils.getConflictResponse("Email already registered"));
+			
 		} else {			
 			Persistence.insert(user);
 			setPictureURL(user, req);
@@ -223,9 +223,9 @@ public class UsersServlet extends HttpServlet {
 			User user = UserDAO.byId(em, userId);
 			
 			if (user == null) {
-				//resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-				resp.setContentType(Constants.CONTENT_TYPE_JSON);
-				resp.getWriter().append(GSON.toJson(Utils.getNotFoundResponse(null)));			
+				
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
+				
 			} else {				
 
 				try {
@@ -262,13 +262,13 @@ public class UsersServlet extends HttpServlet {
 				}
 				
 				if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getPassword())) {
-					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty fields");
-					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Empty fields")));
+					
+					Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Empty fields"));
+					
 				} else if (!user.getEmail().equalsIgnoreCase(req.getParameter("email"))) {
-					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid email");
-					resp.setContentType(Constants.CONTENT_TYPE_JSON);
-					resp.getWriter().append(GSON.toJson(Utils.getBadRequestResponse("Invalid email")));
+					
+					Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Invalid email"));
+					
 				} else {
 					em.persist(user);
 					setPictureURL(user, req);					

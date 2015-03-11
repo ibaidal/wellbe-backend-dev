@@ -19,6 +19,7 @@ public class Session {
     
     
     public static void addNewTokenForUserId(long userId, HttpServletResponse resp) {
+    	log.warning("addNewTokenForUserId: " + userId);
     	String access = StringUtil.randomString(20);
     	String secret = StringUtil.randomString(40);
     	
@@ -37,10 +38,14 @@ public class Session {
     	}
     	
 		resp.addHeader("ags-auth-token", token.toString());
+		log.warning("addHeader: " + token.toString());
     }
     
     
     public static boolean checkSignature(HttpServletRequest req) {
+    	log.warning("Authorization: " + req.getHeader("Authorization"));
+    	log.warning("Date: " + req.getHeader("Date"));
+    	
     	try {
 	    	String[] reqAuth = req.getHeader("Authorization").replaceAll("AGS ", "").split(":");
 	    	String reqDate = req.getHeader("Date");
@@ -66,7 +71,7 @@ public class Session {
     }
     
     public static Token getToken(HttpServletRequest req) {
-    	try {
+    	try {    		    		
 	    	String[] reqAuth = req.getHeader("Authorization").replaceAll("AGS ", "").split(":");
 	    	String reqAccess = reqAuth[0];
 	    	
