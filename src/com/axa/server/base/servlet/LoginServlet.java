@@ -49,13 +49,6 @@ public class LoginServlet extends HttpServlet {
 	
 	
 	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		resp.setHeader("Allow", "POST");
-		resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-	}
-
-
-	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		User user = null;
 		
@@ -74,10 +67,18 @@ public class LoginServlet extends HttpServlet {
 					req.getParameter("password"));
 		}
 		
+		log.warning(user == null ? null : user.toString());
+		
+			
 		if (user == null) {
 			log.warning("Login failed");
 			
-			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse("Invalid credentials"));
+			if("facebook".equals(action)) {
+				Utils.sendError(resp, GSON, Utils.NO_SUCH_ACCOUNT, Utils.getNoSuchAccountResponse("The email address doesn’t exist."));
+			}
+			else {
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse("Invalid credentials"));
+			}
 			
 		} else {
 			Session.addNewTokenForUserId(user.getUserId(), resp);
@@ -88,6 +89,7 @@ public class LoginServlet extends HttpServlet {
 	
 	
 	private User appLogin(String email, String password) {
+		log.warning("email: " + email + ", password: " + password);
 		if (ValidationUtil.anyEmpty(email, password)) return null;
 		return Persistence.getUserByEmailAndPassword(email, password);
 	}
@@ -123,8 +125,6 @@ public class LoginServlet extends HttpServlet {
 					// TODO GET FACEBOOK USER PROFILE PICTURE
 					em.persist(user);	*/
 					
-					Utils.sendError(resp, GSON, Utils.NO_SUCH_ACCOUNT, 
-							Utils.getNoSuchAccountResponse("The email address doesn’t exist."));
 					
 				} else if (ValidationUtil.isEmpty(user.getFbId())) {
 					try {	

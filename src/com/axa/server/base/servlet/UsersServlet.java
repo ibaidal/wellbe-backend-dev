@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +41,8 @@ import com.google.gson.reflect.TypeToken;
 @SuppressWarnings("serial")
 public class UsersServlet extends HttpServlet {
 
+	private static final Logger log = Logger.getLogger(UsersServlet.class.getName());
+	
 	private static final Gson GSON = new GsonBuilder().
 			setDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ").
 			excludeFieldsWithoutExposeAnnotation().create();  
@@ -147,7 +150,6 @@ public class UsersServlet extends HttpServlet {
 					} else if ("password".equals(name)) {
 						user.setPassword(value);
 					} else if ("goals".equals(name)) {
-						user.setPassword(value);
 						user.getGoals().addAll(StringUtil.getStringListFromString(value, ","));
 					}					
 				} else if ("picture".equals(name)) {
@@ -161,6 +163,8 @@ public class UsersServlet extends HttpServlet {
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
+		
+		log.warning(user == null ? null : user.toString());
 		
 				
 		if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getEmail(), user.getPassword())) {
@@ -260,6 +264,8 @@ public class UsersServlet extends HttpServlet {
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
+				
+				log.warning(user == null ? null : user.toString());
 				
 				if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getPassword())) {
 					

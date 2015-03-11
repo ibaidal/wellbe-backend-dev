@@ -124,4 +124,15 @@ public class User {
 		this.goals = goals;
 	}
 
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", email=" + email + ", name=" + name
+				+ ", picture=" + picture + ", pictureBlob=" + pictureBlob
+				+ ", language=" + language + ", fbId=" + fbId + ", goals="
+				+ goals + ", password=" + password + ", emailLowerCase="
+				+ emailLowerCase + "]";
+	}
+	
+	
+
 }
