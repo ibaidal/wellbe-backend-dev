@@ -1,14 +1,7 @@
 package com.axa.server.base.servlet;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -26,16 +19,13 @@ import com.axa.server.base.auth.Session;
 import com.axa.server.base.persistence.EMFService;
 import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.persistence.UserDAO;
-import com.axa.server.base.pods.Recipe;
 import com.axa.server.base.pods.User;
-import com.axa.server.base.response.Status;
 import com.axa.server.base.util.StringUtil;
 import com.axa.server.base.util.Utils;
 import com.axa.server.base.util.ValidationUtil;
 import com.google.appengine.api.datastore.Blob;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 
 @SuppressWarnings("serial")
@@ -64,23 +54,24 @@ public class UsersServlet extends HttpServlet {
 				long userId = pathItems.length > 2 ? Long.parseLong(pathItems[2]) : -1;
 				String action = pathItems.length > 3 ? pathItems[3] : null;
 				user = Persistence.getUserById(userId);	
-						
 				
 				if (user == null) {
 
 					Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
 					
-				} else if ("picture".equals(action)) {
-					resp.setContentType("image/*");
+				} else if ("picture".equals(action)) {									
+					
 					if (user.getPictureBlob() == null) {
 						
 						Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
 						
 					} else {
+						resp.setContentType("image/*");
 						resp.getOutputStream().write(user.getPictureBlob().getBytes());
 					}
+					
 				} else {
-					setPictureURL(user, req);
+					Utils.setPictureURL(user, req);
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);
 					resp.getWriter().append(GSON.toJson(Utils.getUserResponse(user)));
 				}
@@ -164,7 +155,8 @@ public class UsersServlet extends HttpServlet {
 			throw new IOException(e);
 		}
 		
-		log.warning(user == null ? null : user.toString());
+		
+		log.warning(user == null ? "User null" : "User: " + user.toString());
 		
 				
 		if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getEmail(), user.getPassword())) {
@@ -181,7 +173,7 @@ public class UsersServlet extends HttpServlet {
 			
 		} else {			
 			Persistence.insert(user);
-			setPictureURL(user, req);
+			Utils.setPictureURL(user, req);
 			Session.addNewTokenForUserId(user.getUserId(), resp);
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
 			resp.getWriter().append(GSON.toJson(Utils.getCreateUserResponse(user)));
@@ -192,29 +184,18 @@ public class UsersServlet extends HttpServlet {
 				Utils.createFackeUserOne();
 				Utils.createFackeUserTwo();
 				owner = Persistence.getUserByEmail("fake.one@axa.com");
+				// Add Boost Mockup to DB
+				Utils.createNewBoost(user);
+				
 				owner = Persistence.getUserByEmail("fake.two@axa.com");
-			}
-			
-			
-			// Add Boost Mockup to DB
-			Utils.createNewBoost(user);
-			Utils.createDoingBoosts(user);
-			Utils.createDoneBoosts(user);
+				
+				// Add Boost Mockup to DB
+				Utils.createDoingBoosts(user, owner);
+				Utils.createDoneBoosts(user, owner);
+			}					
+
 		}
 		
-	}
-	
-	private void setPictureURL(User user, HttpServletRequest req) {
-		if (user.getPictureBlob() == null) {
-			user.setPicture(null);
-		} else {
-			String idCompPath = "/" + user.getUserId();
-			String url = req.getRequestURL().toString();
-			if (url.contains(String.valueOf(idCompPath))) {
-				url = url.substring(0, url.indexOf(idCompPath));
-			}
-			user.setPicture(url + idCompPath + "/picture");
-		}
 	}
 
 	
@@ -265,7 +246,7 @@ public class UsersServlet extends HttpServlet {
 					throw new IOException(e);
 				}
 				
-				log.warning(user == null ? null : user.toString());
+				log.warning(user == null ? "User null" : "User: " + user.toString());
 				
 				if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getPassword())) {
 					
@@ -273,11 +254,13 @@ public class UsersServlet extends HttpServlet {
 					
 				} else if (!user.getEmail().equalsIgnoreCase(req.getParameter("email"))) {
 					
+					log.warning("Email can not be modified");
+					
 					Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Invalid email"));
 					
 				} else {
 					em.persist(user);
-					setPictureURL(user, req);					
+					Utils.setPictureURL(user, req);					
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);
 					resp.getWriter().append(GSON.toJson(Utils.getUpdateUserResponse(user)));
 				}

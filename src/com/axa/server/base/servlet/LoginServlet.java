@@ -1,12 +1,9 @@
 package com.axa.server.base.servlet;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Reader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
 
@@ -15,23 +12,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.text.WordUtils;
-
 import com.axa.server.base.Constants;
 import com.axa.server.base.auth.Session;
 import com.axa.server.base.persistence.EMFService;
 import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.persistence.UserDAO;
 import com.axa.server.base.pods.FacebookUser;
-import com.axa.server.base.pods.GoogleUser;
 import com.axa.server.base.pods.User;
 import com.axa.server.base.util.Utils;
 import com.axa.server.base.util.ValidationUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
 
 
 @SuppressWarnings("serial")
@@ -42,10 +33,6 @@ public class LoginServlet extends HttpServlet {
 	private static final Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create(); 
 
 	private static final String FACEBOOK_USER_URL = "https://graph.facebook.com/me?access_token=%s";
-	private static final String FACEBOOK_USER_PICTURE_URL = "http://graph.facebook.com/%s/picture?height=" + 
-			String.valueOf(Constants.IMAGE_MAX_SIZE_PX) + "&width=" + 
-			String.valueOf(Constants.IMAGE_MAX_SIZE_PX) + "&type=square";
-
 	
 	
 	@Override
@@ -67,11 +54,11 @@ public class LoginServlet extends HttpServlet {
 					req.getParameter("password"));
 		}
 		
-		log.warning(user == null ? null : user.toString());
 		
-			
+		log.warning(user == null ? "User null" : "User: " + user.toString());
+		
+		
 		if (user == null) {
-			log.warning("Login failed");
 			
 			if("facebook".equals(action)) {
 				Utils.sendError(resp, GSON, Utils.NO_SUCH_ACCOUNT, Utils.getNoSuchAccountResponse("The email address doesn’t exist."));
@@ -89,7 +76,6 @@ public class LoginServlet extends HttpServlet {
 	
 	
 	private User appLogin(String email, String password) {
-		log.warning("email: " + email + ", password: " + password);
 		if (ValidationUtil.anyEmpty(email, password)) return null;
 		return Persistence.getUserByEmailAndPassword(email, password);
 	}
@@ -111,38 +97,33 @@ public class LoginServlet extends HttpServlet {
 		}
 		
 		if (fbUser != null) {
-			EntityManager em = EMFService.createEntityManager();
+			EntityManager em = EMFService.createEntityManager();			
+						
+			user = UserDAO.byEmail(em, fbUser.email);
 			
-						
-				user = UserDAO.byEmail(em, fbUser.email);
+			if (user != null & 
+				ValidationUtil.isEmpty(user.getFbId())) {
 				
-				if (user == null) {
-					/*// Register
-					user = new User();
-					user.setEmail(fbUser.email);
+				try {	
+					em.getTransaction().begin();
+					
 					user.setFbId(fbUser.id);
-					user.setName((fbUser.first_name + " " + fbUser.last_name).trim());
-					// TODO GET FACEBOOK USER PROFILE PICTURE
-					em.persist(user);	*/
+					em.persist(user);				
 					
+					log.warning("FB user updated");
 					
-				} else if (ValidationUtil.isEmpty(user.getFbId())) {
-					try {	
-						em.getTransaction().begin();
-						
-						user.setFbId(fbUser.id);
-						em.persist(user);						
-						
-				    	em.flush();
-				    	em.getTransaction().commit();
-			    	
-					} catch (Exception e) {
-				    	em.getTransaction().rollback();	
-				    	throw e;
-				    } finally {
-						em.close();
-				    }
-				}
+			    	em.flush();
+			    	em.getTransaction().commit();
+		    	
+				} catch (Exception e) {
+			    	em.getTransaction().rollback();	
+			    	e.printStackTrace();
+			    	throw e;
+			    } finally {
+					em.close();
+			    }
+				
+			}
 			
 		}
 		

@@ -8,7 +8,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import com.axa.server.base.pods.Boost;
-import com.axa.server.base.pods.Recipe;
 
 
 public class BoostDAO {
@@ -26,9 +25,9 @@ public class BoostDAO {
 	
 	
 	@SuppressWarnings("unchecked")
-	public static List<Boost> byOwner(EntityManager em, long userId) {
-		Query q = em.createQuery("select t from Boost t where t.ownerId = :userId");
-		q.setParameter("userId", userId);
+	public static List<Boost> byOwner(EntityManager em, long ownerId) {
+		Query q = em.createQuery("select u from Boost u where u.ownerId = :ownerId");
+		q.setParameter("ownerId", ownerId);
 		return (List<Boost>) q.getResultList();
 	}
 

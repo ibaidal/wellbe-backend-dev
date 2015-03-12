@@ -11,6 +11,8 @@ import java.util.List;
 
 
 
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.axa.server.base.Constants;
@@ -27,9 +29,23 @@ import com.google.gson.Gson;
 public final class Utils {
 	
 	public static final int NO_SUCH_ACCOUNT = 212;
+	public static final int CREATED = 201;
 	
 	public static final String fake_picture_one = "http://crackberry.com/sites/crackberry.com/files/styles/large/public/topic_images/2013/ANDROID.png";
-	public static final String fake_picture_two = "https://lh3.googleusercontent.com/-0s48FykazSM/AAAAAAAAAAI/AAAAAAAAALg/aJ0-vobQsCI/photo.jpg";
+	public static final String fake_picture_two = "http://pngimg.com/upload/apple_PNG4938.png";
+	
+	public static void setPictureURL(User user, HttpServletRequest req) {
+		if (user.getPictureBlob() == null) {
+			user.setPicture(null);
+		} else {
+			String idCompPath = "/" + user.getUserId();
+			String url = req.getRequestURL().toString();
+			if (url.contains(String.valueOf(idCompPath))) {
+				url = url.substring(0, url.indexOf(idCompPath));
+			}
+			user.setPicture(url + idCompPath + "/picture");
+		}
+	}
 	
 	public static void sendError(HttpServletResponse resp, Gson GSON, int status, WellBeResponse<Void> entity) throws IOException {
 		resp.setStatus(status);
@@ -57,9 +73,9 @@ public final class Utils {
 		User user = new User();
 		user.setEmail("fake.two@axa.com");
 		user.setEmailLowerCase("fake.two@axa.com");
-		List<String> goals = new ArrayList<String>();
-		goals.add("nutrition");
+		List<String> goals = new ArrayList<String>();		
 		goals.add("mental activity");
+		goals.add("nutrition");
 		user.setGoals(goals);
 		user.setLanguage("es");
 		user.setName("Fake Two");
@@ -69,7 +85,7 @@ public final class Utils {
 		Persistence.insert(user);
 	}
 	
-	public static void createNewBoost(User user) {
+	public static void createNewBoost(User owner) {
 		Calendar creation = Calendar.getInstance();
 		creation.add(Calendar.MONTH, -1);
 
@@ -83,16 +99,16 @@ public final class Utils {
 		boost.setCreation(creation.getTime());
 		boost.setStart(start.getTime());
 		boost.setEnd(end.getTime());
-		boost.setGoal(user.getGoals().get(0));
-		boost.setOwnerId(user.getUserId());
+		boost.setGoal(owner.getGoals().get(0));
+		boost.setOwnerId(owner.getUserId());
 		boost.setPicture("http://blog.sportzone.es/wp-content/uploads/2014/10/keep-up-running-lake-28072011.jpg");
 		boost.setStatus(Boost.Status.NEW.toString().toLowerCase());
-		boost.setTitle("New Boost, goal: " + user.getGoals().get(0) + ", owner: " + user.getName());
+		boost.setTitle("New Boost, goal: " + owner.getGoals().get(0) + ", owner: " + owner.getName());
 		
 		Persistence.insert(boost);
 	}
 	
-	public static void createDoingBoosts(User user) {
+	public static void createDoingBoosts(User user, User owner) {
 		
 		Calendar creation = Calendar.getInstance();
 		creation.add(Calendar.MONTH, -1);
@@ -102,8 +118,6 @@ public final class Utils {
 
 		Calendar end = Calendar.getInstance();
 		end.add(Calendar.WEEK_OF_YEAR, 5);
-		
-		User owner = Persistence.getUserByEmail("fake.one@axa.com");
 		
 		Boost boost;
 		
@@ -116,14 +130,14 @@ public final class Utils {
 			boost.setOwnerId(owner.getUserId());
 			boost.setPicture("http://www.definicionabc.com/wp-content/uploads/Paisaje-Natural.jpg");
 			boost.setStatus(Boost.Status.ONGOING.toString().toLowerCase());
-			boost.setTitle("Doing Boost (Ongoing), goal: " + s + ", owner: " + user.getName());
+			boost.setTitle("Doing Boost (Ongoing), goal: " + s + ", owner: " + owner.getName());
 			
 			Persistence.insert(boost);
 		}		
 		
 	}
 	
-	public static void createDoneBoosts(User user) {
+	public static void createDoneBoosts(User user, User owner) {
 		Calendar creation = Calendar.getInstance();
 		creation.add(Calendar.MONTH, -1);
 
@@ -132,8 +146,6 @@ public final class Utils {
 
 		Calendar end = (Calendar) creation.clone();
 		end.add(Calendar.WEEK_OF_YEAR, 2);
-		
-		User owner = Persistence.getUserByEmail("fake.two@axa.com");
 		
 		Boost boost;
 		
@@ -146,7 +158,7 @@ public final class Utils {
 			boost.setOwnerId(owner.getUserId());
 			boost.setPicture("http://www.islam.com.kw/wp-content/uploads/2015/01/Abraham-His-Children-and-the-One-Message.jpg");
 			boost.setStatus(Boost.Status.ACCOMPLISHED.toString().toLowerCase());
-			boost.setTitle("Doing Boost (Accomplished), goal: " + s + ", owner: " + user.getName());
+			boost.setTitle("Doing Boost (Accomplished), goal: " + s + ", owner: " + owner.getName());
 			
 			Persistence.insert(boost);
 		}	
@@ -156,7 +168,7 @@ public final class Utils {
 	public static WellBeResponse<User> getCreateUserResponse(User user) {
 		WellBeResponse<User> response = new WellBeResponse<User>();
 		
-		Status status = new Status(201, "ok", "User created");	  
+		Status status = new Status(CREATED, "ok", "User created");	  
 		
 		List<Link> links = new ArrayList<Link>();
 		links.add(new Link("getBoosts", "/boosts"));
