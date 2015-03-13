@@ -101,8 +101,17 @@ public class LoginServlet extends HttpServlet {
 						
 			user = UserDAO.byEmail(em, fbUser.email);
 			
-			if (user != null & 
-				ValidationUtil.isEmpty(user.getFbId())) {
+			if (user == null) {
+				/*// Register
+				user = new User();
+				user.setEmail(fbUser.email);
+				user.setFbId(fbUser.id);
+				user.setName((fbUser.first_name + " " + fbUser.last_name).trim());
+				// TODO GET FACEBOOK USER PROFILE PICTURE
+				em.persist(user);	*/
+				
+				
+			} else if (ValidationUtil.isEmpty(user.getFbId())) {
 				
 				try {	
 					em.getTransaction().begin();
