@@ -2,6 +2,7 @@ package com.axa.server.base.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -63,24 +64,41 @@ public class UsersServlet extends HttpServlet {
 					
 					if (user.getPictureBlob() == null) {
 						
-						Utils.sendError(resp, GSON, HttpServletResponse.SC_NOT_FOUND, Utils.getNotFoundResponse(null));
+						Utils.sendError(resp, GSON, Utils.NO_CONTENT, Utils.getNoContentResponse("The user has no profile picture"));
 						
 					} else {
 						resp.setContentType("image/*");
 						resp.getOutputStream().write(user.getPictureBlob().getBytes());
 					}
 					
+				} else if ("friends".equals(action)) {		
+					
+					List<User> friends = Persistence.getUserFriends(user.getUserId());
+					
+					// No friends
+					if(friends == null) {
+						Utils.sendError(resp, GSON, Utils.NO_CONTENT, Utils.getNoContentResponse("The user has no friends"));
+					}
+					else {
+						resp.setContentType(Constants.CONTENT_TYPE_JSON);
+						resp.getWriter().append(GSON.toJson(Utils.getUserFriendsResponse(friends)));
+					}
+					
 				} else {
-					Utils.setPictureURL(user, req);
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);
 					resp.getWriter().append(GSON.toJson(Utils.getUserResponse(user)));
 				}
 				
-			} catch (Exception e) {
+			} catch (NumberFormatException e) {
 
 				Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse(null));
 				
+			} catch (Exception e) {
+
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Utils.getInternalServerErrorResponse(e.getMessage()));
+				
 			}	
+			
 		}
 		
 
@@ -95,12 +113,13 @@ public class UsersServlet extends HttpServlet {
 	@Override
 	public void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		long userId = 0;
+		
 		try {
 			String[] pathItems = req.getRequestURI().split("/");
 			if (pathItems.length > 2) {
 				userId = Long.parseLong(pathItems[2]);
 			}
-		} catch (Exception ignored) {
+		} catch (NumberFormatException ignored) {
 			// Ignore
 		}
 		
@@ -171,9 +190,12 @@ public class UsersServlet extends HttpServlet {
 			
 			Utils.sendError(resp, GSON, HttpServletResponse.SC_CONFLICT, Utils.getConflictResponse("Email already registered"));
 			
-		} else {			
+		} else {	
+			
 			Persistence.insert(user);
-			Utils.setPictureURL(user, req);
+			Utils.setPictureURL(user, req);			
+	    	
+			
 			Session.addNewTokenForUserId(user.getUserId(), resp);
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
 			resp.getWriter().append(GSON.toJson(Utils.getCreateUserResponse(user)));
@@ -259,8 +281,11 @@ public class UsersServlet extends HttpServlet {
 					Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse("Invalid email"));
 					
 				} else {
+
+					Utils.setPictureURL(user, req);	
+					
 					em.persist(user);
-					Utils.setPictureURL(user, req);					
+									
 					resp.setContentType(Constants.CONTENT_TYPE_JSON);
 					resp.getWriter().append(GSON.toJson(Utils.getUpdateUserResponse(user)));
 				}

@@ -5,13 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-
-
-
-
-
-
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,6 +23,8 @@ public final class Utils {
 	
 	public static final int NO_SUCH_ACCOUNT = 212;
 	public static final int CREATED = 201;
+	public static final int NO_CONTENT = 204;
+	
 	
 	public static final String fake_picture_one = "http://crackberry.com/sites/crackberry.com/files/styles/large/public/topic_images/2013/ANDROID.png";
 	public static final String fake_picture_two = "http://pngimg.com/upload/apple_PNG4938.png";
@@ -56,14 +51,13 @@ public final class Utils {
 	public static void createFackeUserOne() {
 		User user = new User();
 		user.setEmail("fake.one@axa.com");
-		user.setEmailLowerCase("fake.one@axa.com");
 		List<String> goals = new ArrayList<String>();
 		goals.add("nutrition");
 		goals.add("physical activity");
 		user.setGoals(goals);
 		user.setLanguage("es");
 		user.setName("Fake One");
-		user.setPassword("123456789");
+		user.setPassword("123456");
 		user.setPicture(fake_picture_one);
 		
 		Persistence.insert(user);
@@ -72,14 +66,13 @@ public final class Utils {
 	public static void createFackeUserTwo() {
 		User user = new User();
 		user.setEmail("fake.two@axa.com");
-		user.setEmailLowerCase("fake.two@axa.com");
 		List<String> goals = new ArrayList<String>();		
 		goals.add("mental activity");
 		goals.add("nutrition");
 		user.setGoals(goals);
 		user.setLanguage("es");
 		user.setName("Fake Two");
-		user.setPassword("123456789");
+		user.setPassword("123456");
 		user.setPicture(fake_picture_two);
 		
 		Persistence.insert(user);
@@ -165,19 +158,29 @@ public final class Utils {
 		
 	}
 	
-	public static WellBeResponse<User> getCreateUserResponse(User user) {
-		WellBeResponse<User> response = new WellBeResponse<User>();
-		
-		Status status = new Status(CREATED, "ok", "User created");	  
-		
+	private static List<Link> getUserLinks(User user) {
 		List<Link> links = new ArrayList<Link>();
 		links.add(new Link("getBoosts", "/boosts"));
 		links.add(new Link("createUser", "/users", Link.Method.POST.toString()));
 		links.add(new Link("updateUser", "/users/" + user.getUserId().toString(), Link.Method.PUT.toString()));
 		links.add(new Link("getUser", "/users/" + user.getUserId().toString(), Link.Method.GET.toString()));
+		links.add(new Link("getUserFriends", "/users/" + user.getUserId().toString() + "/friends", Link.Method.GET.toString()));
+		return links;
+	}
+	
+	private static List<Link> getBoostLinks(Boost boost) {
+		List<Link> links = new ArrayList<Link>();
+		links.add(new Link("getBoosts", "/boosts"));
+		return links;
+	}
+	
+	public static WellBeResponse<User> getCreateUserResponse(User user) {
+		WellBeResponse<User> response = new WellBeResponse<User>();
+		
+		Status status = new Status(CREATED, "ok", "User created");	  
 		
 		response.setData(user);
-		response.setLinks(links);
+		user.setLinks(getUserLinks(user));
 		response.setStatus(status);
 		
 		return response;
@@ -186,13 +189,20 @@ public final class Utils {
 	public static WellBeResponse<UserBoosts> getUserBoostListResponse(List<Boost> boosts, List<User> people) {
 		WellBeResponse<UserBoosts> response = new WellBeResponse<UserBoosts>();
 		
+		for(User p : people) {
+			p.setLinks(getUserLinks(p));
+		}
+		
+		for(Boost b : boosts) {
+		b.setLinks(getBoostLinks(b));	
+		}
+		
 		Status status = new Status(200, "ok", null);	  
 		
 		List<Link> links = new ArrayList<Link>();
 		links.add(new Link("getBoosts", "/boosts"));
 		
 		response.setData(new UserBoosts(boosts, people));		
-		response.setLinks(links);
 		response.setStatus(status);
 		
 		return response;
@@ -200,6 +210,7 @@ public final class Utils {
 	
 	public static WellBeResponse<User> getLoginUserResponse(User user) {
 		WellBeResponse<User> response = getCreateUserResponse(user);
+		user.setLinks(getUserLinks(user));
 		
 		response.setStatus(new Status(200, "ok", "User logged"));	  
 		
@@ -208,6 +219,7 @@ public final class Utils {
 	
 	public static WellBeResponse<User> getUserResponse(User user) {
 		WellBeResponse<User> response = getCreateUserResponse(user);
+		user.setLinks(getUserLinks(user));
 		
 		response.setStatus(new Status(200, "ok", null));
 	  	
@@ -216,6 +228,7 @@ public final class Utils {
 	
 	public static WellBeResponse<User> getUpdateUserResponse(User user) {
 		WellBeResponse<User> response = getCreateUserResponse(user);
+		user.setLinks(getUserLinks(user));
 		
 		response.setStatus(new Status(200, "ok", "User updated"));
 	  	
@@ -227,7 +240,6 @@ public final class Utils {
 		WellBeResponse<Void> response = new WellBeResponse<Void>();	
 		
 		response.setStatus(new Status(400, "Bad Request", description));
-		response.setLinks(null);
 		
 		return response;
 	}
@@ -236,7 +248,14 @@ public final class Utils {
 		WellBeResponse<Void> response = new WellBeResponse<Void>();	
 		
 		response.setStatus(new Status(401, "Unauthorized", description));	
-		response.setLinks(null);
+		
+		return response;
+	}
+	
+	public static WellBeResponse<Void> getForbiddenResponse(String description) {
+		WellBeResponse<Void> response = new WellBeResponse<Void>();	
+		
+		response.setStatus(new Status(403, "Forbidden", description));	
 		
 		return response;
 	}
@@ -245,7 +264,6 @@ public final class Utils {
 		WellBeResponse<Void> response = new WellBeResponse<Void>();	
 		
 		response.setStatus(new Status(404, "Not Found", description));	  
-		response.setLinks(null);
 		
 		return response;
 	}
@@ -254,7 +272,6 @@ public final class Utils {
 		WellBeResponse<Void> response = new WellBeResponse<Void>();	
 		
 		response.setStatus(new Status(409, "Conflict", description));
-		response.setLinks(null);
 		
 		return response;
 	}
@@ -264,7 +281,38 @@ public final class Utils {
 		WellBeResponse<Void> response = new WellBeResponse<Void>();	
 		
 		response.setStatus(new Status(NO_SUCH_ACCOUNT, "No Such Account", description));	
-		response.setLinks(null);
+		
+		return response;
+	}
+	
+	public static WellBeResponse<Void> getInternalServerErrorResponse(String description) {
+		WellBeResponse<Void> response = new WellBeResponse<Void>();	
+		
+		response.setStatus(new Status(500, "Internal Server Error", description));	
+		
+		return response;
+	}
+	
+	public static WellBeResponse<Void> getNoContentResponse(String description) throws IOException {
+		WellBeResponse<Void> response = new WellBeResponse<Void>();	
+		
+		response.setStatus(new Status(NO_CONTENT, "No Content", description));	
+		
+		return response;
+	}
+
+	public static WellBeResponse<List<User>> getUserFriendsResponse(List<User> friends) {
+		WellBeResponse<List<User>> response = new WellBeResponse<List<User>>();
+		
+		for(User f : friends) {
+			f.setLinks(getUserLinks(f));
+		}
+		
+		Status status = new Status(200, "ok", null);	  
+		
+		
+		response.setData(friends);		
+		response.setStatus(status);
 		
 		return response;
 	}

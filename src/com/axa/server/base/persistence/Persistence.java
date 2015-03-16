@@ -1,5 +1,6 @@
 package com.axa.server.base.persistence;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -10,6 +11,7 @@ import com.axa.server.base.pods.Recipe;
 import com.axa.server.base.pods.Token;
 import com.axa.server.base.pods.User;
 import com.axa.server.base.pods.Boost;
+import com.axa.server.base.pods.UserNameComparator;
 
 
 public class Persistence {
@@ -206,6 +208,20 @@ public class Persistence {
 		EntityManager em = EMFService.createEntityManager();
 		try {
 			return BoostDAO.byId(em, boostId);
+		} catch (NoResultException e) {
+	        return null;
+	    } finally {
+			em.close();
+	    }
+	}
+	
+	public static List<User> getUserFriends(long userId) {
+		EntityManager em = EMFService.createEntityManager();
+		try {
+			List<User> friends = UserDAO.getUserFriends(em, userId);
+			Collections.sort(friends, new UserNameComparator());
+			
+			return friends;
 		} catch (NoResultException e) {
 	        return null;
 	    } finally {

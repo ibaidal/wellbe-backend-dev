@@ -61,10 +61,10 @@ public class LoginServlet extends HttpServlet {
 		if (user == null) {
 			
 			if("facebook".equals(action)) {
-				Utils.sendError(resp, GSON, Utils.NO_SUCH_ACCOUNT, Utils.getNoSuchAccountResponse("The email address doesn’t exist."));
+				Utils.sendError(resp, GSON, Utils.NO_SUCH_ACCOUNT, Utils.getNoSuchAccountResponse("The email address does not exist."));
 			}
 			else {
-				Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse("Invalid credentials"));
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_FORBIDDEN, Utils.getForbiddenResponse("Invalid credentials"));
 			}
 			
 		} else {

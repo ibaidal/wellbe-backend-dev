@@ -7,10 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
 
+import com.axa.server.base.response.Link;
 import com.google.appengine.api.datastore.Blob;
 import com.google.gson.annotations.Expose;
 
@@ -22,26 +21,15 @@ public class User {
 	@Expose private Long userId;
 	@Expose private String email;
 	@Expose private String name;
-	@Expose @Transient private String picture;	
+	@Expose private String picture;	
 	private Blob pictureBlob;	
 	@Expose private String language;
 	@Expose private String fbId;
 	@Expose private List<String> goals = new ArrayList<String>();
 
 	private String password;
-	private String emailLowerCase;
+	@Expose @Transient private List<Link> links = new ArrayList<Link>();
 	
-
-	@PrePersist
-	@PreUpdate
-	public void prePersist() {
-		if (email != null) {
-			emailLowerCase = email.toLowerCase();
-		} else {
-			emailLowerCase = null;
-		}
-		
-	}
 
 	public Long getUserId() {
 		return userId;
@@ -57,14 +45,6 @@ public class User {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	public String getEmailLowerCase() {
-		return emailLowerCase;
-	}
-
-	public void setEmailLowerCase(String emailLowerCase) {
-		this.emailLowerCase = emailLowerCase;
 	}
 
 	public String getPassword() {
@@ -123,16 +103,23 @@ public class User {
 	public void setGoals(List<String> goals) {
 		this.goals = goals;
 	}
+	
+	public List<Link> getLinks() {
+		return links;
+	}
+
+	public void setLinks(List<Link> links) {
+		this.links = links;
+	}
+	
 
 	@Override
 	public String toString() {
 		return "User [userId=" + userId + ", email=" + email + ", name=" + name
 				+ ", picture=" + picture + ", pictureBlob=" + pictureBlob
 				+ ", language=" + language + ", fbId=" + fbId + ", goals="
-				+ goals + ", password=" + password + ", emailLowerCase="
-				+ emailLowerCase + "]";
+				+ goals + ", password=" + password + "]";
 	}
-	
 	
 
 }

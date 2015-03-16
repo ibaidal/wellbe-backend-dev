@@ -1,17 +1,17 @@
 package com.axa.server.base.pods;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.Transient;
 
+import com.axa.server.base.response.Link;
 import com.google.gson.annotations.Expose;
 
 
@@ -34,6 +34,8 @@ public class Boost {
     @Expose private Date creation;
     @Expose private Date start;
     @Expose private Date end;
+    
+	@Expose @Transient private List<Link> links = new ArrayList<Link>();
 
 	
     public Boost() {
@@ -215,6 +217,14 @@ public class Boost {
         this.end = end;
     }
 
+	public List<Link> getLinks() {
+		return links;
+	}
+
+	public void setLinks(List<Link> links) {
+		this.links = links;
+	}
+	
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Boost{");

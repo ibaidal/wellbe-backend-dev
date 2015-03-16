@@ -61,7 +61,6 @@ public class BoostsServlet extends HttpServlet {
 						List<Boost> boosts = new ArrayList<Boost>();
 						boosts.add(boost);
 						List<User> users = new ArrayList<User>();
-						Utils.setPictureURL(user, req);
 						users.add(user);
 						
 						// One Boost
@@ -88,7 +87,6 @@ public class BoostsServlet extends HttpServlet {
 										
 					
 					List<User> users = new ArrayList<User>();
-					Utils.setPictureURL(user, req);
 					users.add(user);
 					User aux = Persistence.getUserByEmail("fake.one@axa.com");
 					aux.setPicture(Utils.fake_picture_one);
@@ -103,11 +101,17 @@ public class BoostsServlet extends HttpServlet {
 				}
 									
 				
-			} catch (Exception e) {
-				
+			} catch (NumberFormatException e) {
+
 				Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse(null));
 				
-			}
+			} catch (Exception e) {
+
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Utils.getInternalServerErrorResponse(e.getMessage()));
+				
+			}	
+			
+			
 		}
 
 	}
