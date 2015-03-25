@@ -2,6 +2,7 @@ package com.axa.server.base.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -21,6 +22,7 @@ import com.axa.server.base.persistence.EMFService;
 import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.persistence.UserDAO;
 import com.axa.server.base.pods.User;
+import com.axa.server.base.pods.UserNameComparator;
 import com.axa.server.base.util.StringUtil;
 import com.axa.server.base.util.Utils;
 import com.axa.server.base.util.ValidationUtil;
@@ -76,10 +78,19 @@ public class UsersServlet extends HttpServlet {
 					List<User> friends = Persistence.getUserFriends(user.getUserId());
 					
 					// No friends
-					if(friends == null) {
+					if(friends.isEmpty()) {
 						Utils.sendError(resp, GSON, Utils.NO_CONTENT, Utils.getNoContentResponse("The user has no friends"));
 					}
 					else {
+						// Alphabetical order by name
+						Collections.sort(friends, new UserNameComparator());
+						
+						// Add picture: Removes /{userId}/friends from URL to have /{friend userId}/picture
+						String urlBase = req.getRequestURL().toString();
+						urlBase = urlBase.substring(0, urlBase.lastIndexOf("/"));
+						urlBase = urlBase.substring(0, urlBase.lastIndexOf("/"));
+						Utils.setPictureURL(friends, urlBase);
+						
 						resp.setContentType(Constants.CONTENT_TYPE_JSON);
 						resp.getWriter().append(GSON.toJson(Utils.getUserFriendsResponse(friends)));
 					}
@@ -107,7 +118,16 @@ public class UsersServlet extends HttpServlet {
 
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		doRegister(req, resp);		
+		try{
+			
+			doRegister(req, resp);
+			
+		} catch (Exception e) {
+			
+			Utils.sendError(resp, GSON, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Utils.getInternalServerErrorResponse(e.getMessage()));
+			
+		}	
+		
 	}
 	
 	@Override
@@ -128,7 +148,15 @@ public class UsersServlet extends HttpServlet {
 			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse(null));
 			
 		} else if (userId != 0) {
-			doUpdate(req, resp, userId);
+			try {
+				
+				doUpdate(req, resp, userId);
+				
+			} catch (Exception e) {
+
+				Utils.sendError(resp, GSON, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Utils.getInternalServerErrorResponse(e.getMessage()));
+				
+			}	
 		} else {
 			
 			Utils.sendError(resp, GSON, HttpServletResponse.SC_BAD_REQUEST, Utils.getBadRequestResponse(null));
@@ -174,8 +202,6 @@ public class UsersServlet extends HttpServlet {
 			throw new IOException(e);
 		}
 		
-		
-		log.warning(user == null ? "User null" : "User: " + user.toString());
 		
 				
 		if (ValidationUtil.anyEmpty(user.getGoals(), user.getName(), user.getEmail(), user.getPassword())) {

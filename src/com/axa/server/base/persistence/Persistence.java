@@ -218,12 +218,9 @@ public class Persistence {
 	public static List<User> getUserFriends(long userId) {
 		EntityManager em = EMFService.createEntityManager();
 		try {
-			List<User> friends = UserDAO.getUserFriends(em, userId);
-			Collections.sort(friends, new UserNameComparator());
-			
-			return friends;
+			return UserDAO.getUserFriends(em, userId);
 		} catch (NoResultException e) {
-	        return null;
+	        return Collections.emptyList();
 	    } finally {
 			em.close();
 	    }

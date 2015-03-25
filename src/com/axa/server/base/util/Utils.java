@@ -11,12 +11,15 @@ import javax.servlet.http.HttpServletResponse;
 import com.axa.server.base.Constants;
 import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.pods.Boost;
+import com.axa.server.base.pods.BoostActivity;
+import com.axa.server.base.pods.BoostParticipants;
 import com.axa.server.base.pods.User;
 import com.axa.server.base.pods.UserBoosts;
 import com.axa.server.base.response.Link;
 import com.axa.server.base.response.Status;
 import com.axa.server.base.response.WellBeResponse;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 
 public final class Utils {
@@ -39,6 +42,34 @@ public final class Utils {
 				url = url.substring(0, url.indexOf(idCompPath));
 			}
 			user.setPicture(url + idCompPath + "/picture");
+		}
+	}
+	
+	public static void setPictureURL(BoostActivity ba, HttpServletRequest req) {
+		if (ba.getImageBlob() == null) {
+			ba.setImage(null);
+		} else {
+			String idCompPath = "/" + ba.getActivityId();
+			String url = req.getRequestURL().toString();
+			if (url.contains(String.valueOf(idCompPath))) {
+				url = url.substring(0, url.indexOf(idCompPath));
+			}
+			ba.setImage(url + idCompPath + "/picture");	
+		}
+	}
+	
+	public static void setPictureURL(User user, String urlBase) {
+		if (user.getPictureBlob() == null) {
+			user.setPicture(null);
+		} else {
+			String idCompPath = "/" + user.getUserId();
+			user.setPicture(urlBase + idCompPath + "/picture");
+		}
+	}
+	
+	public static void setPictureURL(List<User> users, String urlBase) {
+		for(User user : users) {
+			setPictureURL(user, urlBase);
 		}
 	}
 	
@@ -171,6 +202,8 @@ public final class Utils {
 	private static List<Link> getBoostLinks(Boost boost) {
 		List<Link> links = new ArrayList<Link>();
 		links.add(new Link("getBoosts", "/boosts"));
+		links.add(new Link("getBoostParticipants", "/boosts/" + boost.getBoostId() + "/participants"));
+		
 		return links;
 	}
 	
@@ -312,6 +345,41 @@ public final class Utils {
 		
 		
 		response.setData(friends);		
+		response.setStatus(status);
+		
+		return response;
+	}
+	
+	public static WellBeResponse<BoostParticipants> getBoostParticipantsResponse(List<User> participants, List<User> pending) {
+		WellBeResponse<BoostParticipants> response = new WellBeResponse<BoostParticipants>();
+		
+		for(User f : participants) {
+			f.setLinks(getUserLinks(f));
+		}
+		
+		for(User f : pending) {
+			f.setLinks(getUserLinks(f));
+		}
+		
+		Status status = new Status(200, "ok", null);	
+		
+		BoostParticipants bp = new BoostParticipants();
+		bp.setParticipants(participants);
+		bp.setPending(pending);
+		
+		response.setData(bp);		
+		response.setStatus(status);
+		
+		return response;
+	}
+
+	public static WellBeResponse<BoostActivity> getCreateBoostActivityResponse(BoostActivity ba) {
+		WellBeResponse<BoostActivity> response = new WellBeResponse<BoostActivity>();
+		
+		Status status = new Status(CREATED, "ok", "Activity created");	  
+		
+		response.setData(ba);
+		ba.setLinks(null);
 		response.setStatus(status);
 		
 		return response;
