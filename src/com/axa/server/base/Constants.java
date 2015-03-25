@@ -7,4 +7,6 @@ public interface Constants {
 	
 	public static final int IMAGE_MAX_SIZE_PX = 200;
 	
+	public static final String IMAGE_CONTENT_TYPE = "image/jpeg";
+	
 }

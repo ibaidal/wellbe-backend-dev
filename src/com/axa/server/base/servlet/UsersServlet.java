@@ -69,7 +69,7 @@ public class UsersServlet extends HttpServlet {
 						Utils.sendError(resp, GSON, Utils.NO_CONTENT, Utils.getNoContentResponse("The user has no profile picture"));
 						
 					} else {
-						resp.setContentType("image/*");
+						resp.setContentType(Constants.IMAGE_CONTENT_TYPE);
 						resp.getOutputStream().write(user.getPictureBlob().getBytes());
 					}
 					

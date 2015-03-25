@@ -163,7 +163,7 @@ public class BoostsServlet extends HttpServlet {
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		
-		if (false/*!Session.checkSignature(req)*/) {
+		if (!Session.checkSignature(req)) {
 			
 			Utils.sendError(resp, GSON, HttpServletResponse.SC_UNAUTHORIZED, Utils.getUnauthorizedResponse(null));
 			
