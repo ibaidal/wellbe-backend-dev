@@ -23,6 +23,7 @@ import com.axa.server.base.persistence.Persistence;
 import com.axa.server.base.persistence.UserDAO;
 import com.axa.server.base.pods.User;
 import com.axa.server.base.pods.UserNameComparator;
+import com.axa.server.base.response.WellBeResponse;
 import com.axa.server.base.util.StringUtil;
 import com.axa.server.base.util.Utils;
 import com.axa.server.base.util.ValidationUtil;
@@ -224,7 +225,10 @@ public class UsersServlet extends HttpServlet {
 			
 			Session.addNewTokenForUserId(user.getUserId(), resp);
 			resp.setContentType(Constants.CONTENT_TYPE_JSON);
-			resp.getWriter().append(GSON.toJson(Utils.getCreateUserResponse(user)));
+			WellBeResponse<User> response = Utils.getCreateUserResponse(user);
+			resp.getWriter().append(GSON.toJson(response));
+			
+			log.warning(response.toString());
 			
 			User owner = Persistence.getUserByEmail("fake.one@axa.com");
 			// Add Users Mockup to DB						

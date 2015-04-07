@@ -203,6 +203,8 @@ public final class Utils {
 		List<Link> links = new ArrayList<Link>();
 		links.add(new Link("getBoosts", "/boosts"));
 		links.add(new Link("getBoostParticipants", "/boosts/" + boost.getBoostId() + "/participants"));
+		links.add(new Link("newBoostActivity", "/boosts/" + boost.getBoostId() + "/activity", Link.Method.POST.toString()));
+		links.add(new Link("getBoostActivity", "/boosts/" + boost.getBoostId() + "/activity"));
 		
 		return links;
 	}
@@ -227,13 +229,10 @@ public final class Utils {
 		}
 		
 		for(Boost b : boosts) {
-		b.setLinks(getBoostLinks(b));	
+			b.setLinks(getBoostLinks(b));	
 		}
 		
 		Status status = new Status(200, "ok", null);	  
-		
-		List<Link> links = new ArrayList<Link>();
-		links.add(new Link("getBoosts", "/boosts"));
 		
 		response.setData(new UserBoosts(boosts, people));		
 		response.setStatus(status);

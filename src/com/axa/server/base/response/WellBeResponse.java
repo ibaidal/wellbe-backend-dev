@@ -50,4 +50,9 @@ public class WellBeResponse<T> {
         this.data = data;
     }
 
+	@Override
+	public String toString() {
+		return "WellBeResponse [status=" + status + ", data=" + data + "]";
+	}
+
 }

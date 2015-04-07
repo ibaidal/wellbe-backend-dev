@@ -126,5 +126,15 @@ public class BoostActivity {
 		this.links = links;
 	}
 	
+	@Override
+	public String toString() {
+		return "BoostActivity [activityId=" + activityId + ", boostId="
+				+ boostId + ", userId=" + userId + ", type=" + type + ", text="
+				+ text + ", url=" + url + ", image=" + image + ", imageBlob="
+				+ imageBlob + ", latitude=" + latitude + ", longitude="
+				+ longitude + ", place=" + place + ", placeId=" + placeId
+				+ ", creation=" + creation + ", links=" + links + "]";
+	}
+	
 
 }
